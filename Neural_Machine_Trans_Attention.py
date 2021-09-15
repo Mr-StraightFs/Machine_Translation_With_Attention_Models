@@ -31,5 +31,17 @@ print("Y.shape:", Y.shape)
 print("Xoh.shape:", Xoh.shape)
 print("Yoh.shape:", Yoh.shape)
 
+index = 0
+print("Source date:", dataset[index][0])
+print("Target date:", dataset[index][1])
+print()
+print("Source after preprocessing (indices):", X[index])
+print("Target after preprocessing (indices):", Y[index])
+print()
+print("Source after preprocessing (one-hot):", Xoh[index])
+print("Target after preprocessing (one-hot):", Yoh[index])
+
+
+
 
 
