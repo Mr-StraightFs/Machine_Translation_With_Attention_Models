@@ -12,3 +12,7 @@ import random
 from tqdm import tqdm
 from babel.dates import format_date
 import matplotlib.pyplot as plt
+
+# Loading the Dataset
+m = 10000
+dataset, human_vocab, machine_vocab, inv_machine_vocab = load_dataset(m)
