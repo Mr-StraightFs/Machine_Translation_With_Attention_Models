@@ -41,6 +41,14 @@ print()
 print("Source after preprocessing (one-hot):", Xoh[index])
 print("Target after preprocessing (one-hot):", Yoh[index])
 
+# Defined shared layers as global variables
+repeator = RepeatVector(Tx)
+concatenator = Concatenate(axis=-1)
+densor1 = Dense(10, activation = "tanh")
+densor2 = Dense(1, activation = "relu")
+activator = Activation(softmax, name='attention_weights') # We are using a custom softmax(axis = 1) loaded in this notebook
+dotor = Dot(axes = 1)
+
 
 
 
