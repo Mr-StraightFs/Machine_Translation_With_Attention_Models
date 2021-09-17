@@ -49,7 +49,7 @@ densor2 = Dense(1, activation = "relu")
 activator = Activation(softmax, name='attention_weights') # We are using a custom softmax(axis = 1) loaded in this notebook
 dotor = Dot(axes = 1)
 
-
+# one_step_attention
 def one_step_attention(a, s_prev):
     """
     Performs one step of attention: Outputs a context vector computed as a dot product of the attention weights
@@ -77,6 +77,63 @@ def one_step_attention(a, s_prev):
     context = dotor([alphas, a])
 
     return context
+
+n_a = 32 # number of units for the pre-attention, bi-directional LSTM's hidden state 'a'
+n_s = 64 # number of units for the post-attention LSTM's hidden state "s"
+
+# this is the post attention LSTM cell.
+post_activation_LSTM_cell = LSTM(n_s, return_state = True) # Please do not modify this global variable.
+output_layer = Dense(len(machine_vocab), activation=softmax)
+
+# Attention Mechanism Model
+def modelf(Tx, Ty, n_a, n_s, human_vocab_size, machine_vocab_size):
+    """
+    Arguments:
+    Tx -- length of the input sequence
+    Ty -- length of the output sequence
+    n_a -- hidden state size of the Bi-LSTM
+    n_s -- hidden state size of the post-attention LSTM
+    human_vocab_size -- size of the python dictionary "human_vocab"
+    machine_vocab_size -- size of the python dictionary "machine_vocab"
+
+    Returns:
+    model -- Keras model instance
+    """
+
+    # Define the inputs of your model with a shape (Tx,)
+    # Define s0 (initial hidden state) and c0 (initial cell state)
+    # for the decoder LSTM with shape (n_s,)
+    X = Input(shape=(Tx, human_vocab_size))
+    s0 = Input(shape=(n_s,), name='s0')
+    c0 = Input(shape=(n_s,), name='c0')
+    s = s0
+    c = c0
+
+    # Initialize empty list of outputs
+    outputs = []
+
+    # Step 1: Define your pre-attention Bi-LSTM
+    a = Bidirectional(LSTM(n_a, return_sequences=True))(X)
+
+    # Step 2: Iterate for Ty steps
+    for t in range(Ty):
+        # Step 2.A: Perform one step of the attention mechanism to get back the context vector at step t
+        context = one_step_attention(a, s)
+
+        # Step 2.B: Apply the post-attention LSTM cell to the "context" vector.
+        # Don't forget to pass: initial_state = [hidden state, cell state]
+        s, _, c = post_activation_LSTM_cell(context, initial_state=[s, c])
+
+        # Step 2.C: Apply Dense layer to the hidden state output of the post-attention LSTM
+        out = output_layer(s)
+
+        # Step 2.D: Append "out" to the "outputs" list (≈ 1 line)
+        outputs.append(out)
+
+    # Step 3: Create model instance taking three inputs and returning the list of outputs.
+    model = Model(inputs=[X, s0, c0], outputs=outputs)
+    return model
+
 
 
 
