@@ -50,6 +50,37 @@ activator = Activation(softmax, name='attention_weights') # We are using a custo
 dotor = Dot(axes = 1)
 
 
+def one_step_attention(a, s_prev):
+    """
+    Performs one step of attention: Outputs a context vector computed as a dot product of the attention weights
+    "alphas" and the hidden states "a" of the Bi-LSTM.
+
+    Arguments:
+    a -- hidden state output of the Bi-LSTM, numpy-array of shape (m, Tx, 2*n_a)
+    s_prev -- previous hidden state of the (post-attention) LSTM, numpy-array of shape (m, n_s)
+
+    Returns:
+    context -- context vector, input of the next (post-attention) LSTM cell
+    """
+    # Use repeator to repeat s_prev to be of shape (m, Tx, n_s) so that you can concatenate it with all hidden states "a"
+    s_prev = repeator(s_prev)
+    # Use concatenator to concatenate a and s_prev on the last axis
+    # For grading purposes, please list 'a' first and 's_prev' second, in this order.
+    concat = concatenator([a, s_prev])
+    # Use densor1 to propagate concat through a small fully-connected neural network to compute the "intermediate energies" variable e.
+    e = densor1(concat)
+    # Use densor2 to propagate e through a small fully-connected neural network to compute the "energies" variable energies
+    energies = densor2(e)
+    # Use "activator" on "energies" to compute the attention weights "alphas" (≈ 1 line)
+    alphas = activator(energies)
+    # Use dotor together with "alphas" and "a", in this order, to compute the context vector to be given to the next (post-attention) LSTM-cell
+    context = dotor([alphas, a])
+
+    return context
+
+
+
+
 
 
 
